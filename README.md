@@ -45,7 +45,7 @@ Setup instructions will be added by the team.
 
 ## Mentor
 
-Assigned mentor: To be confirmed.
+Assigned mentor: Bash
 
 ## Programme
 
