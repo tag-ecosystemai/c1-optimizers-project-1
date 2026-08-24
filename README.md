@@ -11,6 +11,7 @@ This repository contains Team Optimizers' work for Project 1 of the TAG AI Engin
 - Hannah Igboke
 - Salaudeen Sheriffdeen
 - Atujuna Emmanuel
+- Jayeoba Victor
 
 ## Project Brief
 
