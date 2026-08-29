@@ -6,9 +6,9 @@ This repository contains Team Optimizers' work for Project 1 of the TAG AI Engin
 
 ## Team Members
 
+- Hannah Igboke (Project Lead)
 - Nunsi Shiaki
 - Rachel Onyeamachi Iwebuke
-- Hannah Igboke
 - Salaudeen Sheriffdeen
 - Atujuna Emmanuel
 - Jayeoba Victor
@@ -27,7 +27,29 @@ To be documented by the team.
 
 ## Project Structure
 
-To be documented as the project develops.
+```
+c1-optimizers/
+├── ai-ml-backbone/
+│   ├── classify.py
+|   |── eda-and-model-develpment-notebook.ipynb
+│   ├── test.py
+│   └── models/
+│       ├── intent_classifier_svm.joblib
+│       └── sentiment_classifier_svm.joblib
+│
+├── backend/
+│   ├── 
+│   ├── 
+│   └── requirements.txt
+│
+├── frontend/
+│   ├── 
+│   └── requirements.txt
+│
+│
+├── .gitignore
+└── README.md
+```
 
 ## Getting Started
 

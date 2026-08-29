@@ -1,1 +1,5 @@
 venv/
+__pycache__/
+*.pyc
+.env
+ai-ml-backbone/eda-and-model-development-notebook.ipynb
