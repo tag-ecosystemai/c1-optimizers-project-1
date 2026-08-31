@@ -1,5 +1,13 @@
 venv/
+venv312/
 __pycache__/
 *.pyc
+*.log
 .env
+.pytest_cache/
 ai-ml-backbone/eda-and-model-development-notebook.ipynb
+.venv/
+*.orig
+.vscode/
+.idea/
+.DS_Store
