@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% from "_macros.html" import page_header, message_table %}
+{% from "_icons.html" import icon_bars %}
+
+{% block title %}Customer Intelligence Dashboard{% endblock %}
+{% block topbar_title %}dashboard{% endblock %}
+
+{% block content %}
+{{ page_header(icon_bars(), "operations log", "Customer Intelligence Dashboard") }}
+
+<section class="stat-row">
+  <div class="stat-tile">
+    <p class="stat-label">Total Messages</p>
+    <p class="stat-value">{{ total }}</p>
+  </div>
+  <div class="stat-tile stat-positive">
+    <p class="stat-label">Positive</p>
+    <p class="stat-value">{{ positive }}</p>
+  </div>
+  <div class="stat-tile stat-negative">
+    <p class="stat-label">Negative</p>
+    <p class="stat-value">{{ negative }}</p>
+  </div>
+</section>
+
+<section>
+  <h2>Recent Messages</h2>
+  {{ message_table(messages, queue_accents) }}
+</section>
+
+<section>
+  <h2>Messages by Queue</h2>
+  <div class="bar-chart">
+    {% for queue, count in queue_counts.items() %}
+    <div class="bar-row">
+      <span class="bar-label">{{ queue }}</span>
+      <div class="bar-track">
+        <div
+          class="bar-fill bar-accent-{{ queue_accents.get(queue, 'default') }}"
+          style="width: {{ ((count / max_count * 100) if max_count else 0)|round(1) }}%"
+        ></div>
+      </div>
+      <span class="bar-value mono">{{ count }}</span>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

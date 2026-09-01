@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% from "_macros.html" import page_header %}
+{% from "_icons.html" import icon_folder, icon_upload %}
+
+{% block title %}Bulk Message Classification{% endblock %}
+{% block topbar_title %}bulk upload{% endblock %}
+
+{% block content %}
+{{ page_header(icon_folder(), "batch intake", "Bulk Message Classification", "Upload customer messages CSV") }}
+
+<form class="card upload-card" method="post" enctype="multipart/form-data" id="uploadForm" novalidate>
+  <label class="field-label" for="csvFile">Customer messages CSV</label>
+
+  <label class="dropzone" for="csvFile" id="dropzone">
+    <input type="file" id="csvFile" name="csv_file" accept=".csv" class="visually-hidden">
+    <span class="dropzone-btn">{{ icon_upload() }} Upload</span>
+    <span class="dropzone-meta">200MB per file &bull; CSV</span>
+    <span class="dropzone-filename" id="dropzoneFilename" hidden></span>
+  </label>
+
+  <button type="submit" class="btn btn-primary" id="uploadSubmit" disabled>Upload &amp; classify</button>
+</form>
+{% endblock %}

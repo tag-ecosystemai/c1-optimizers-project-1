@@ -1,0 +1,43 @@
+{% macro page_header(icon_html, eyebrow, title, subtitle=None) %}
+<header class="page-header">
+  <div class="page-header-icon" aria-hidden="true">{{ icon_html }}</div>
+  <div class="page-header-text">
+    <span class="eyebrow">{{ eyebrow }}</span>
+    <h1>{{ title }}</h1>
+    {% if subtitle %}<p class="page-subtitle">{{ subtitle }}</p>{% endif %}
+  </div>
+</header>
+{% endmacro %}
+
+{% macro message_table(messages, queue_accents={}) %}
+{% if messages %}
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>customer_id</th>
+        <th>message</th>
+        <th>intent</th>
+        <th>sentiment</th>
+        <th>language</th>
+        <th>queue</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for m in messages %}
+      <tr>
+        <td class="mono">{{ m.customer_id }}</td>
+        <td>{{ m.message }}</td>
+        <td>{{ m.intent }}</td>
+        <td><span class="stamp stamp-{{ m.sentiment|lower }}">{{ m.sentiment }}</span></td>
+        <td>{{ m.language }}</td>
+        <td><span class="route-tag route-tag-{{ queue_accents.get(m.queue, 'default') }}">{{ m.queue }}</span></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<p class="empty-state">No messages in this queue yet.</p>
+{% endif %}
+{% endmacro %}

@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Customer Intelligence Classifier{% endblock %} · Team Optimizers</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='42' fill='none' stroke='%232C4770' stroke-width='9'/%3E%3Ccircle cx='50' cy='50' r='24' fill='none' stroke='%232C4770' stroke-width='9'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;800&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+  <div class="shell">
+    <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-top">
+        <a class="app-mark" href="{{ url_for('main.home') }}">
+          <span class="brand-stamp brand-stamp-sm" aria-hidden="true"><span>CI</span></span>
+          <span class="app-mark-text">Customer<br>Intelligence</span>
+        </a>
+        <button class="sidebar-toggle" id="sidebarToggle" type="button" aria-label="Collapse sidebar" aria-expanded="true">
+          <span aria-hidden="true">&laquo;</span>
+        </button>
+      </div>
+
+      <nav class="nav" aria-label="Primary">
+        <span class="nav-eyebrow">navigate</span>
+        <ul>
+          <li>
+            <a href="{{ url_for('main.home') }}" class="{{ 'active' if request.endpoint == 'main.home' }}">
+              {% from "_icons.html" import icon_inbox %}
+              <span class="nav-icon">{{ icon_inbox() }}</span><span class="nav-label">app</span>
+            </a>
+          </li>
+          <li>
+            <a href="{{ url_for('main.bulk_upload') }}" class="{{ 'active' if request.endpoint == 'main.bulk_upload' }}">
+              {% from "_icons.html" import icon_folder %}
+              <span class="nav-icon">{{ icon_folder() }}</span><span class="nav-label">bulk upload</span>
+            </a>
+          </li>
+          <li>
+            <a href="{{ url_for('main.classify') }}" class="{{ 'active' if request.endpoint == 'main.classify' }}">
+              {% from "_icons.html" import icon_message %}
+              <span class="nav-icon">{{ icon_message() }}</span><span class="nav-label">classify</span>
+            </a>
+          </li>
+          <li>
+            <a href="{{ url_for('main.dashboard') }}" class="{{ 'active' if request.endpoint == 'main.dashboard' }}">
+              {% from "_icons.html" import icon_bars %}
+              <span class="nav-icon">{{ icon_bars() }}</span><span class="nav-label">dashboard</span>
+            </a>
+          </li>
+          <li>
+            <a href="{{ url_for('main.team_queues') }}" class="{{ 'active' if request.endpoint == 'main.team_queues' }}">
+              {% from "_icons.html" import icon_people %}
+              <span class="nav-icon">{{ icon_people() }}</span><span class="nav-label">team queues</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+
+      {% block sidebar_extra %}{% endblock %}
+    </aside>
+
+    <div class="main-col">
+      <header class="topbar">
+        <button class="sidebar-toggle-mobile" id="sidebarToggleMobile" type="button" aria-label="Toggle navigation" aria-expanded="false">
+          <span aria-hidden="true">&#9776;</span>
+        </button>
+        <span class="topbar-title">{% block topbar_title %}{% endblock %}</span>
+      </header>
+
+      <main class="content">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+          <div class="flash-stack">
+            {% for category, message in messages %}
+            <div class="alert alert-{{ category }}" role="status">
+              <span class="alert-message">{{ message }}</span>
+              <button type="button" class="alert-dismiss" aria-label="Dismiss">&times;</button>
+            </div>
+            {% endfor %}
+          </div>
+          {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+      </main>
+    </div>
+  </div>
+
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

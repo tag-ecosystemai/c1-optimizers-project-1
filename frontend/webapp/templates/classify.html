@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% from "_macros.html" import page_header %}
+{% from "_icons.html" import icon_message, icon_search %}
+
+{% block title %}Classify Customer Message{% endblock %}
+{% block topbar_title %}classify{% endblock %}
+
+{% block content %}
+{{ page_header(icon_message(), "single message intake", "Classify Customer Message", "Submit a customer message to classify intent, sentiment, language and routing queue.") }}
+
+<form class="card" method="post" id="classifyForm">
+  <label class="field-label" for="messageInput">Customer Message</label>
+  <textarea
+    id="messageInput"
+    name="message"
+    rows="8"
+    placeholder="Example: I haven't received my refund yet and it has been two weeks."
+  >{{ message_text }}</textarea>
+
+  <p class="field-hint">
+    <span class="field-hint-label">Supported languages</span>
+    <span class="lang-tag">EN &middot; English</span>
+    <span class="lang-tag">DE &middot; German</span>
+  </p>
+
+  <button type="submit" class="btn btn-primary btn-block" id="classifySubmit">
+    {{ icon_search() }} Classify Message
+  </button>
+</form>
+{% endblock %}
