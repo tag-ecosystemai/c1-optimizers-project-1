@@ -1,0 +1,13 @@
+venv/
+venv312/
+__pycache__/
+*.pyc
+*.pyo
+*.log
+.git/
+.gitignore
+.env
+.pytest_cache/
+.ruff_cache/
+*.md
+frontend/
