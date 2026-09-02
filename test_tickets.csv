@@ -1,0 +1,6 @@
+subject,body,source,language
+Payment failed,I was charged but my payment failed,email,en
+Cannot login,I cannot access my account,slack,en
+Refund request,I need a refund for my purchase,email,en
+Internet outage,The service has been down since this morning,slack,en
+Password reset,I need help resetting my password,email,en

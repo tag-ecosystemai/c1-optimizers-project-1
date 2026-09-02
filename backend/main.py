@@ -6,9 +6,8 @@ from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
-
 from backend.config import settings
-from backend.routers import health
+from backend.routers import health, ingest, tickets
 from backend.services import classifier
 
 logger = logging.getLogger(__name__)
@@ -30,8 +29,22 @@ def create_app() -> FastAPI:
     )
 
     app.include_router(health.router)
-
+    app.include_router(ingest.router)
+    app.include_router(tickets.router)
     return app
 
 
 app = create_app()
+
+
+
+
+
+
+
+
+
+
+
+
+
