@@ -32,7 +32,7 @@ INTENT_QUEUES = (
 
 SENTIMENTS = ("Negative", "Neutral", "Positive")
 SOURCES = ("slack", "email", "csv")
-PRIORITIES = ("normal", "urgent")
+PRIORITIES = ("low", "medium", "high")
 TICKET_STATUSES = ("open", "in_progress", "resolved")
 BATCH_STATUSES = ("pending", "processing", "completed", "failed")
 
@@ -60,7 +60,7 @@ class Ticket(Base):
     predicted_sentiment: Mapped[str] = mapped_column(String(16), nullable=False)
     routed_team: Mapped[str] = mapped_column(String(64), nullable=False)
 
-    priority: Mapped[str] = mapped_column(String(16), nullable=False, default="normal")
+    priority: Mapped[str] = mapped_column(String(16), nullable=False, default="low")
     status: Mapped[str] = mapped_column(String(16), nullable=False, default="open")
 
     source_ref: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
