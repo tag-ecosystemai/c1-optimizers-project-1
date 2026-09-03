@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% from "_icons.html" import icon_target, icon_pulse, icon_globe, icon_envelope, icon_folder, icon_bars %}
+
+{% block title %}Customer Intelligence Classifier{% endblock %}
+{% block topbar_title %}app{% endblock %}
+
+{% block sidebar_extra %}
+<div class="sidebar-divider"></div>
+
+<div class="brand-card">
+  <span class="brand-stamp" aria-hidden="true"><span>TO</span></span>
+  <div>
+    <p class="brand-name">Team Optimizers</p>
+    <p class="brand-tagline">Customer Intelligence Platform</p>
+  </div>
+</div>
+
+<div class="sidebar-divider"></div>
+
+<div class="sidebar-note">
+  <h2>Navigation</h2>
+  <p>Use the pages above to interact with the platform.</p>
+</div>
+
+<a class="btn btn-primary btn-block" href="{{ url_for('main.classify') }}">Get started &rarr;</a>
+{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <span class="brand-stamp hero-stamp" aria-hidden="true"><span>CI&middot;01</span></span>
+  <span class="eyebrow">platform overview</span>
+  <h1>Customer Intelligence Classifier</h1>
+  <p class="hero-lead">
+    An intelligent customer support platform that automatically classifies customer messages by
+    intent and sentiment, detects language, routes messages to the appropriate specialist team,
+    and provides actionable analytics through an interactive dashboard.
+  </p>
+</section>
+
+<section class="welcome">
+  <h2>Welcome</h2>
+  <p>This application helps customer support teams efficiently manage incoming customer messages using Artificial Intelligence.</p>
+  <p>
+    Every message is analyzed to identify <strong>what the customer needs</strong>,
+    <strong>how the customer feels</strong>, and <strong>which team should handle the request</strong>.
+  </p>
+</section>
+
+<section class="capabilities">
+  <h2>Platform Capabilities</h2>
+  <div class="capability-grid">
+    <article class="capability-card">
+      <div class="capability-icon">{{ icon_target() }}</div>
+      <h3>Intent Classification</h3>
+      <p>Identifies what the customer actually needs — refund, technical issue, account access, and more.</p>
+    </article>
+    <article class="capability-card">
+      <div class="capability-icon">{{ icon_pulse() }}</div>
+      <h3>Sentiment Analysis</h3>
+      <p>Flags how the customer feels so frustrated messages never sit unnoticed in a queue.</p>
+    </article>
+    <article class="capability-card">
+      <div class="capability-icon">{{ icon_globe() }}</div>
+      <h3>Language Detection</h3>
+      <p>Recognizes the language a message was written in before it's routed anywhere.</p>
+    </article>
+    <article class="capability-card">
+      <div class="capability-icon">{{ icon_envelope() }}</div>
+      <h3>Smart Routing</h3>
+      <p>Sends every message straight to the specialist team built to handle it.</p>
+    </article>
+    <article class="capability-card">
+      <div class="capability-icon">{{ icon_folder() }}</div>
+      <h3>Bulk Processing</h3>
+      <p>Classifies a full CSV of customer messages in a single upload.</p>
+    </article>
+    <article class="capability-card">
+      <div class="capability-icon">{{ icon_bars() }}</div>
+      <h3>Live Analytics</h3>
+      <p>Tracks volume, sentiment, and queue load on one dashboard.</p>
+    </article>
+  </div>
+</section>
+{% endblock %}

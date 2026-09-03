@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% from "_macros.html" import page_header, message_table %}
+{% from "_icons.html" import icon_people %}
+
+{% block title %}Team Queues{% endblock %}
+{% block topbar_title %}team queues{% endblock %}
+
+{% block content %}
+{{ page_header(icon_people(), "queue manifest", "Team Queues") }}
+
+<form class="card" method="get" id="queueForm">
+  <label class="field-label" for="queueSelect">Select Team Queue</label>
+  <select id="queueSelect" name="queue">
+    {% for q in queues %}
+    <option value="{{ q }}" {{ "selected" if q == selected }}>{{ q }}</option>
+    {% endfor %}
+  </select>
+  <noscript><button type="submit" class="btn btn-primary">View queue</button></noscript>
+</form>
+
+<h2>{{ selected }} Queue</h2>
+{{ message_table(messages, queue_accents) }}
+{% endblock %}
