@@ -114,7 +114,7 @@ def build_ticket(subject: str | None, body: str, when: datetime, index: int) -> 
         predicted_queue=result["predicted_queue"],
         predicted_sentiment=result["predicted_sentiment"],
         routed_team=result["routed_team"],
-        priority=result["priority"],
+        priority=result["predicted_priority"],
         status=random.choices(
             ("open", "in_progress", "resolved"), weights=(0.6, 0.25, 0.15), k=1
         )[0],
