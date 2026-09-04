@@ -18,8 +18,8 @@
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-top">
         <a class="app-mark" href="{{ url_for('main.home') }}">
-          <span class="brand-stamp brand-stamp-sm" aria-hidden="true"><span>CI</span></span>
-          <span class="app-mark-text">Customer<br>Intelligence</span>
+          <span class="brand-stamp brand-stamp-sm" aria-hidden="true"><span>NS</span></span>
+          <span class="app-mark-text">NorthStack<br>Customer Intelligence</span>
         </a>
         <button class="sidebar-toggle" id="sidebarToggle" type="button" aria-label="Collapse sidebar" aria-expanded="true">
           <span aria-hidden="true">&laquo;</span>
@@ -32,7 +32,7 @@
           <li>
             <a href="{{ url_for('main.home') }}" class="{{ 'active' if request.endpoint == 'main.home' }}">
               {% from "_icons.html" import icon_inbox %}
-              <span class="nav-icon">{{ icon_inbox() }}</span><span class="nav-label">app</span>
+              <span class="nav-icon">{{ icon_inbox() }}</span><span class="nav-label">home</span>
             </a>
           </li>
           <li>
@@ -57,6 +57,12 @@
             <a href="{{ url_for('main.team_queues') }}" class="{{ 'active' if request.endpoint == 'main.team_queues' }}">
               {% from "_icons.html" import icon_people %}
               <span class="nav-icon">{{ icon_people() }}</span><span class="nav-label">team queues</span>
+            </a>
+          </li>
+          <li>
+            <a href="{{ url_for('main.glossary') }}" class="{{ 'active' if request.endpoint == 'main.glossary' }}">
+              {% from "_icons.html" import icon_book %}
+              <span class="nav-icon">{{ icon_book() }}</span><span class="nav-label">glossary</span>
             </a>
           </li>
         </ul>

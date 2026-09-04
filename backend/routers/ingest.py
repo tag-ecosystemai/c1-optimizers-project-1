@@ -14,7 +14,6 @@ router = APIRouter(prefix="/ingest", tags=["ingest"])
 
 
 def _classify_and_save(db: Session, normalized: dict) -> TicketResponse:
-    """Shared core: every ingestion path converges here."""
     classified = classifier.classify(
         subject=normalized["subject"],
         body=normalized["body"],
@@ -25,6 +24,8 @@ def _classify_and_save(db: Session, normalized: dict) -> TicketResponse:
         classified=classified,
         source=normalized["source"],
         language=normalized["language"],
+        subject=normalized["subject"],
+        source_ref=normalized.get("source_ref"),
     )
     return TicketResponse.model_validate(ticket)
 
@@ -41,10 +42,15 @@ def ingest(payload: TicketIngest, db: Session = Depends(get_db)):
     return _classify_and_save(db, normalized)
 
 
-@router.post("/slack", response_model=TicketResponse)
+@router.post("/slack", response_model=TicketResponse | dict)
 def ingest_slack(payload: dict, db: Session = Depends(get_db)):
-    """Raw Slack event payload - normalized via adapters.py first."""
+    if payload.get("type") == "url_verification":
+        return {"challenge": payload["challenge"]}
+
     normalized = adapters.from_slack(payload)
+    if not normalized["body"]:
+        return {"status": "ignored"}  # skip non-message events (joins, reactions, etc.)
+
     return _classify_and_save(db, normalized)
 
 

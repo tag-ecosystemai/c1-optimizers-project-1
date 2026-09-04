@@ -5,7 +5,7 @@ __pycache__/
 *.log
 .env
 .pytest_cache/
-ai-ml-backbone/eda-and-model-development-notebook.ipynb
+data/
 .venv/
 *.orig
 .vscode/

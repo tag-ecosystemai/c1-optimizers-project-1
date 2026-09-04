@@ -8,41 +8,86 @@
 {% block content %}
 {{ page_header(icon_bars(), "operations log", "Customer Intelligence Dashboard") }}
 
+<form method="get" class="date-filter-form date-filter-spaced">
+  <label for="daysSelect">Show:</label>
+  <select id="daysSelect" name="days" onchange="this.form.submit()">
+    <option value="" {{ "selected" if not selected_days }}>All time</option>
+    <option value="7" {{ "selected" if selected_days == 7 }}>Last 7 days</option>
+    <option value="14" {{ "selected" if selected_days == 14 }}>Last 14 days</option>
+    <option value="30" {{ "selected" if selected_days == 30 }}>Last 30 days</option>
+  </select>
+</form>
+
 <section class="stat-row">
   <div class="stat-tile">
     <p class="stat-label">Total Messages</p>
     <p class="stat-value">{{ total }}</p>
   </div>
-  <div class="stat-tile stat-positive">
-    <p class="stat-label">Positive</p>
-    <p class="stat-value">{{ positive }}</p>
+  <div class="stat-tile">
+    <p class="stat-label">Teams</p>
+    <p class="stat-value">{{ num_teams }}</p>
   </div>
-  <div class="stat-tile stat-negative">
-    <p class="stat-label">Negative</p>
-    <p class="stat-value">{{ negative }}</p>
+  <div class="stat-tile stat-priority-high">
+    <p class="stat-label">High Priority</p>
+    <p class="stat-value">{{ priority_counts.high }}</p>
+  </div>
+  <div class="stat-tile stat-priority-medium">
+    <p class="stat-label">Medium Priority</p>
+    <p class="stat-value">{{ priority_counts.medium }}</p>
+  </div>
+  <div class="stat-tile stat-priority-low">
+    <p class="stat-label">Low Priority</p>
+    <p class="stat-value">{{ priority_counts.low }}</p>
+  </div>
+</section>
+
+<section class="dashboard-mid-grid">
+  <div>
+    <h2>Messages by Team</h2>
+    <div class="bar-chart">
+      {% for team, count in team_counts.items() %}
+      <div class="bar-row">
+        <span class="bar-label">{{ team }}</span>
+        <div class="bar-track">
+          <div
+            class="bar-fill bar-accent-uniform"
+            style="width: {{ ((count / max_count * 100) if max_count else 0)|round(1) }}%"
+          >
+            <span class="bar-fill-value">{{ count }}</span>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div>
+    <h2>Sentiment Distribution</h2>
+    {% set sentiment_total = sentiment_counts.Positive + sentiment_counts.Neutral + sentiment_counts.Negative %}
+    {% if sentiment_total %}
+      {% set pos_pct = (sentiment_counts.Positive / sentiment_total * 100)|round(2) %}
+      {% set neu_pct = (sentiment_counts.Neutral / sentiment_total * 100)|round(2) %}
+      {% set neg_pct = (sentiment_counts.Negative / sentiment_total * 100)|round(2) %}
+      <div class="pie-chart"
+        style="background: conic-gradient(
+          var(--sentiment-positive) 0% {{ pos_pct }}%,
+          var(--sentiment-neutral) {{ pos_pct }}% {{ pos_pct + neu_pct }}%,
+          var(--sentiment-negative) {{ pos_pct + neu_pct }}% 100%
+        );">
+      </div>
+      <ul class="pie-legend">
+        <li><span class="legend-dot legend-positive"></span>Positive — {{ sentiment_counts.Positive }}</li>
+        <li><span class="legend-dot legend-neutral"></span>Neutral — {{ sentiment_counts.Neutral }}</li>
+        <li><span class="legend-dot legend-negative"></span>Negative — {{ sentiment_counts.Negative }}</li>
+      </ul>
+    {% else %}
+      <p class="empty-state">No messages yet.</p>
+    {% endif %}
   </div>
 </section>
 
 <section>
   <h2>Recent Messages</h2>
-  {{ message_table(messages, queue_accents) }}
-</section>
-
-<section>
-  <h2>Messages by Queue</h2>
-  <div class="bar-chart">
-    {% for queue, count in queue_counts.items() %}
-    <div class="bar-row">
-      <span class="bar-label">{{ queue }}</span>
-      <div class="bar-track">
-        <div
-          class="bar-fill bar-accent-{{ queue_accents.get(queue, 'default') }}"
-          style="width: {{ ((count / max_count * 100) if max_count else 0)|round(1) }}%"
-        ></div>
-      </div>
-      <span class="bar-value mono">{{ count }}</span>
-    </div>
-    {% endfor %}
-  </div>
+  {{ message_table(messages) }}
 </section>
 {% endblock %}

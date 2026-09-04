@@ -32,6 +32,7 @@ class TicketResponse(BaseModel):
     text: str
     source: str
     language: str | None
+    source_ref: dict | None = None
 
     predicted_queue: str
     predicted_sentiment: str
@@ -64,3 +65,11 @@ class AnalyticsSummary(BaseModel):
 class VolumePoint(BaseModel):
     date: str
     count: int
+
+class TicketUpdate(BaseModel):
+    status: str | None = None
+    predicted_queue: str | None = None
+
+class TicketUpdate(BaseModel):
+    status: str | None = None
+    predicted_queue: str | None = None

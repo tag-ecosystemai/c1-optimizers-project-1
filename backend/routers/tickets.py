@@ -43,9 +43,8 @@ def list_tickets(
 
 
 @router.get("/analytics", response_model=AnalyticsSummary)
-def get_analytics(db: Session = Depends(get_db)):
-    """Aggregate counts for the dashboard's summary cards/charts."""
-    return AnalyticsSummary(**repository.get_analytics_summary(db))
+def get_analytics(days: int | None = None, db: Session = Depends(get_db)):
+    return AnalyticsSummary(**repository.get_analytics_summary(db, days=days))
 
 
 @router.get("/analytics/volume", response_model=list[VolumePoint])
@@ -70,6 +69,9 @@ def update_ticket(ticket_id: UUID, payload: TicketUpdate, db: Session = Depends(
 
     if payload.status is not None:
         ticket.status = payload.status
+    if payload.predicted_queue is not None:
+        ticket.predicted_queue = payload.predicted_queue
+        ticket.routed_team = payload.predicted_queue
 
     db.commit()
     db.refresh(ticket)

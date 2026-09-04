@@ -1,6 +1,6 @@
 """Persistence helpers for tickets and batch jobs."""
 
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import Any
 from uuid import UUID
 
@@ -12,28 +12,28 @@ from backend.models import Ticket
 
 
 
-def save_ticket(db: Session, classified: dict[str, Any], source: str, language: str | None) -> Ticket:
+def save_ticket(db: Session, classified: dict, source: str, language: str | None,
+                 subject: str | None = None, source_ref: dict | None = None) -> Ticket:
     """
     Takes the output of classify_and_route() plus source metadata,
     saves it as a Ticket row, and returns the saved object.
     """
     ticket = Ticket(
-        subject=classified.get("subject"),
+        subject=subject,
         body=classified["text"] if "body" not in classified else classified["body"],
         text=classified["text"],
         source=source,
         language=language,
         predicted_queue=classified["predicted_queue"],
         predicted_sentiment=classified["predicted_sentiment"],
-        priority=classified["predicted_priority"],   # <-- fixed: was predicted_priority
+        priority=classified["predicted_priority"],
         routed_team=classified["routed_team"],
+        source_ref=source_ref,
         classified_at=datetime.now(timezone.utc),
     )
-
     db.add(ticket)
     db.commit()
-    db.refresh(ticket)  # populates auto-generated fields like id, created_at
-
+    db.refresh(ticket)
     return ticket
 
 
@@ -70,30 +70,19 @@ def list_tickets(
     )
 
 
-def get_analytics_summary(db: Session) -> dict:
-    """Aggregate counts for the overall dashboard."""
+def get_analytics_summary(db: Session, days: int | None = None) -> dict:
+    """Aggregate counts for the overall dashboard. If `days` is given,
+    only counts tickets from the last N days."""
     base = db.query(Ticket).filter(Ticket.deleted_at.is_(None))
 
-    by_queue = (
-        base.with_entities(Ticket.predicted_queue, func.count(Ticket.id))
-        .group_by(Ticket.predicted_queue)
-        .all()
-    )
-    by_sentiment = (
-        base.with_entities(Ticket.predicted_sentiment, func.count(Ticket.id))
-        .group_by(Ticket.predicted_sentiment)
-        .all()
-    )
-    by_priority = (
-        base.with_entities(Ticket.priority, func.count(Ticket.id))
-        .group_by(Ticket.priority)
-        .all()
-    )
-    by_source = (
-        base.with_entities(Ticket.source, func.count(Ticket.id))
-        .group_by(Ticket.source)
-        .all()
-    )
+    if days:
+        since = datetime.now(timezone.utc) - timedelta(days=days)
+        base = base.filter(Ticket.created_at >= since)
+
+    by_queue = base.with_entities(Ticket.predicted_queue, func.count(Ticket.id)).group_by(Ticket.predicted_queue).all()
+    by_sentiment = base.with_entities(Ticket.predicted_sentiment, func.count(Ticket.id)).group_by(Ticket.predicted_sentiment).all()
+    by_priority = base.with_entities(Ticket.priority, func.count(Ticket.id)).group_by(Ticket.priority).all()
+    by_source = base.with_entities(Ticket.source, func.count(Ticket.id)).group_by(Ticket.source).all()
 
     total = base.count()
 

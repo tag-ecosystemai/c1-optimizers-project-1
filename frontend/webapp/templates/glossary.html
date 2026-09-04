@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% from "_macros.html" import page_header %}
+
+{% block title %}Glossary{% endblock %}
+{% block topbar_title %}glossary{% endblock %}
+
+{% block content %}
+{{ page_header('', "reference", "Glossary") }}
+
+<section class="glossary-section"></section>
+  <h2>Team Responsibilities</h2>
+  <table>
+    <thead><tr><th>Team</th><th>Responsible for</th></tr></thead>
+    <tbody>
+      {% for team, desc in team_descriptions.items() %}
+      <tr><td>{{ team }}</td><td>{{ desc }}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+
+<section class="glossary-section">
+  <h2>Sentiment</h2>
+  <table>
+    <thead><tr><th>Sentiment</th><th>Meaning</th></tr></thead>
+    <tbody>
+      {% for s, desc in sentiment_meanings.items() %}
+      <tr><td>{{ s }}</td><td>{{ desc }}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+
+<section class="glossary-section">
+  <h2>Priority</h2>
+  <table>
+    <thead><tr><th>Priority</th><th>Meaning</th></tr></thead>
+    <tbody>
+      {% for p, desc in priority_meanings.items() %}
+      <tr><td>{{ p|capitalize }}</td><td>{{ desc }}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endblock %}
