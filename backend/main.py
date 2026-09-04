@@ -1,5 +1,5 @@
 """FastAPI application entrypoint. Builds the app, mounts routers, and
-warms the classifier via lifespan before traffic is served."""
+warms the classifier in the background so the port opens immediately."""
 
 import asyncio
 import logging
@@ -11,31 +11,25 @@ from fastapi import FastAPI
 from backend.config import settings
 from backend.routers import health, ingest, tickets
 from backend.services import classifier
-from scripts.poll_email import check_inbox  # import your existing function
 
 logger = logging.getLogger(__name__)
 
 
-async def email_polling_loop():
-    while True:
-        try:
-            check_inbox()
-        except Exception as e:
-            logger.error(f"Email poll failed: {e}")
-        await asyncio.sleep(30)
+async def load_models_background():
+    """Runs model loading in a thread so it doesn't block the event loop
+    or delay port binding."""
+    try:
+        await asyncio.to_thread(classifier.load)
+        logger.info("Classifier ready.")
+    except Exception as e:
+        logger.error(f"Classifier failed to load: {e}")
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
-    logger.info("Loading classifier models...")
-    classifier.load()
-    logger.info("Classifier ready.")
-
-    task = asyncio.create_task(email_polling_loop())
-
+    logger.info("Starting up - port will open immediately, models load in background...")
+    asyncio.create_task(load_models_background())
     yield
-
-    task.cancel()
 
 
 def create_app() -> FastAPI:
