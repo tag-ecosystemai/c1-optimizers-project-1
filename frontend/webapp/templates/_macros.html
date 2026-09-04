@@ -9,29 +9,53 @@
 </header>
 {% endmacro %}
 
-{% macro message_table(messages, queue_accents={}) %}
+{% macro message_table(messages, team_accents={}, teams=[], show_reassign=False) %}
 {% if messages %}
 <div class="table-wrap">
   <table>
     <thead>
       <tr>
-        <th>customer_id</th>
-        <th>message</th>
-        <th>intent</th>
-        <th>sentiment</th>
+        <th>date</th>
+        <th>customer</th>
+        <th>subject</th>
+        <th>body</th>
+        <th>source</th>
         <th>language</th>
-        <th>queue</th>
+        <th>sentiment</th>
+        <th>priority</th>
+        <th>team</th>
+        {% if show_reassign %}<th>reassign</th>{% endif %}
       </tr>
     </thead>
     <tbody>
       {% for m in messages %}
       <tr>
-        <td class="mono">{{ m.customer_id }}</td>
-        <td>{{ m.message }}</td>
-        <td>{{ m.intent }}</td>
-        <td><span class="stamp stamp-{{ m.sentiment|lower }}">{{ m.sentiment }}</span></td>
-        <td>{{ m.language }}</td>
-        <td><span class="route-tag route-tag-{{ queue_accents.get(m.queue, 'default') }}">{{ m.queue }}</span></td>
+        <td class="mono">{{ m.created_at[:16].replace('T', ' ') }}</td>
+        <td>
+          {% if m.source_ref and m.source_ref.from %}{{ m.source_ref.from }}
+          {% elif m.source_ref and m.source_ref.user %}{{ m.source_ref.user }}
+          {% elif m.source_ref and m.source_ref.customer_id %}{{ m.source_ref.customer_id }}
+          {% else %}—{% endif %}
+        </td>
+        <td>{{ m.subject or "—" }}</td>
+        <td>{{ m.body[:50] }}{% if m.body|length > 50 %}&hellip;{% endif %}</td>
+        <td class="mono">{{ m.source }}</td>
+        <td class="mono">{{ m.language or "—" }}</td>
+        <td><span class="stamp stamp-{{ m.predicted_sentiment|lower }}">{{ m.predicted_sentiment }}</span></td>
+        <td><span class="stamp stamp-priority-{{ m.priority }}">{{ m.priority|capitalize }}</span></td>
+        <td><span class="route-tag route-tag-{{ team_accents.get(m.predicted_queue, 'default') }}">{{ m.predicted_queue }}</span></td>
+        {% if show_reassign %}
+        <td>
+          <form method="post" action="{{ url_for('main.reassign_ticket', ticket_id=m.id) }}" class="reassign-form">
+            <select name="new_queue">
+              {% for t in teams %}
+              <option value="{{ t }}" {{ "selected" if t == m.predicted_queue }}>{{ t }}</option>
+              {% endfor %}
+            </select>
+            <button type="submit" class="btn btn-small">Move</button>
+          </form>
+        </td>
+        {% endif %}
       </tr>
       {% endfor %}
     </tbody>

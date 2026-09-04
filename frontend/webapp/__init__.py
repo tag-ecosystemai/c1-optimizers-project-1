@@ -10,8 +10,10 @@ def create_app() -> Flask:
     app = Flask(__name__)
 
     app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "dev-only-secret-key-change-me")
-    # Matches the "200MB per file" limit shown on the bulk upload screen.
     app.config["MAX_CONTENT_LENGTH"] = 200 * 1024 * 1024
+
+    # Base URL of the FastAPI backend - overridable via env var for deployment later
+    app.config["API_BASE_URL"] = os.environ.get("API_BASE_URL", "http://127.0.0.1:8000")
 
     from .blueprints.main import bp as main_bp
 

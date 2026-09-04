@@ -924,8 +924,17 @@ section > h2 {
 
 .table-wrap {
   overflow-x: auto;
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
+  width: 100%;
+}
+
+.table-wrap table {
+  min-width: 900px;  /* forces horizontal scroll instead of squeezing columns */
+  white-space: nowrap;
+}
+
+.table-wrap td {
+  white-space: normal;  /* body/subject can still wrap within their own cell */
+  max-width: 260px;
 }
 
 table {
@@ -1093,4 +1102,87 @@ td.mono {
   .stat-row {
     grid-template-columns: 1fr;
   }
+}
+
+/* Capitalize nav labels without touching the HTML text */
+.nav-label { text-transform: capitalize; }
+
+/* Priority stamps */
+.stamp-priority-low { background: var(--priority-low, #e6f4ea); color: #1e7a34; }
+.stamp-priority-medium { background: var(--priority-medium, #fff4e0); color: #b6790a; }
+.stamp-priority-high { background: var(--priority-high, #fde8e8); color: #c62828; }
+
+.stat-priority-high { border-left: 3px solid #c62828; }
+.stat-priority-medium { border-left: 3px solid #b6790a; }
+.stat-priority-low { border-left: 3px solid #1e7a34; }
+
+/* Dashboard mid grid */
+.dashboard-mid-grid {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 2rem;
+  margin: 2rem 0;
+}
+
+/* Pie chart */
+:root {
+  --sentiment-positive: #2f9e44;
+  --sentiment-neutral: #adb5bd;
+  --sentiment-negative: #e03131;
+}
+.pie-chart {
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  margin: 0 auto 1rem;
+}
+.pie-legend { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 0.4rem; }
+.legend-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 0.5rem; }
+.legend-positive { background: var(--sentiment-positive); }
+.legend-neutral { background: var(--sentiment-neutral); }
+.legend-negative { background: var(--sentiment-negative); }
+
+/* Team queues folder nav */
+.queue-layout { display: grid; grid-template-columns: 220px 1fr; gap: 2rem; }
+.team-folder-list { display: flex; flex-direction: column; gap: 0.25rem; }
+.team-folder-item {
+  padding: 0.6rem 0.9rem;
+  border-radius: 6px;
+  text-decoration: none;
+  color: inherit;
+}
+.team-folder-item.active { background: var(--accent, #2C4770); color: #fff; }
+
+/* Capabilities list */
+.capabilities-list { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 1rem; }
+.capabilities-list li { display: flex; gap: 0.9rem; align-items: flex-start; }
+.capability-icon-inline { flex-shrink: 0; width: 24px; height: 24px; }
+
+.hero-cta-row { display: flex; gap: 1rem; margin-top: 1.5rem; }
+
+.reassign-form { display: flex; gap: 0.4rem; align-items: center; }
+
+.bar-fill {
+  position: relative;
+}
+.bar-fill-value {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #fff;
+}
+
+.date-filter-spaced {
+  margin-bottom: 1.5rem;
+}
+
+.bar-accent-uniform {
+  background: #2C4770;
+}
+
+.glossary-section {
+  margin-bottom: 2.5rem;
 }

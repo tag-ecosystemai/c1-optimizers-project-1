@@ -1,42 +1,49 @@
 """Normalise Slack, email, and CSV payloads to a common shape."""
 
 from typing import Any
+from langdetect import detect, LangDetectException
 
 
-def from_slack(payload: dict[str, Any]) -> dict[str, Any]:
-    """
-    Slack event payloads have no subject line - just message text.
-    Expects something like: {"text": "...", "channel": "...", "user": "..."}
-    """
+def detect_language(text: str) -> str | None:
+    if not text or not text.strip():
+        return None
+    try:
+        return detect(text)  # returns 'en', 'de', etc.
+    except LangDetectException:
+        return None
+
+
+def from_slack(payload: dict) -> dict:
+    event = payload.get("event", payload)
+    body = event.get("text", "").strip()
     return {
         "subject": None,
-        "body": payload.get("text", "").strip(),
+        "body": body,
         "source": "slack",
-        "language": None,  # could be detected later; Slack doesn't tell us directly
+        "language": detect_language(body),
+        "source_ref": {"user": event.get("user")},
     }
 
 
-def from_email(payload: dict[str, Any]) -> dict[str, Any]:
-    """
-    Email payloads have a real subject line and body.
-    Expects something like: {"subject": "...", "body": "...", "from": "..."}
-    """
+def from_email(payload: dict) -> dict:
+    subject = payload.get("subject", "").strip() or None
+    body = payload.get("body", "").strip()
     return {
-        "subject": payload.get("subject", "").strip() or None,
-        "body": payload.get("body", "").strip(),
+        "subject": subject,
+        "body": body,
         "source": "email",
-        "language": None,
+        "language": detect_language(body),
+        "source_ref": {"from": payload.get("from")},
     }
 
 
-def from_csv_row(row: dict[str, Any]) -> dict[str, Any]:
-    """
-    A single row from an uploaded CSV. Assumes columns roughly named
-    'subject' and 'body' - adjust key names if the actual CSV format differs.
-    """
+def from_csv_row(row: dict) -> dict:
+    subject = (row.get("subject") or "").strip() or None
+    body = (row.get("body") or "").strip()
     return {
-        "subject": (row.get("subject") or "").strip() or None,
-        "body": (row.get("body") or "").strip(),
+        "subject": subject,
+        "body": body,
         "source": "csv",
-        "language": row.get("language"),  # CSV might optionally include this
+        "language": row.get("language") or detect_language(body),
+        "source_ref": {"customer_id": row.get("customer_id")} if row.get("customer_id") else None,
     }

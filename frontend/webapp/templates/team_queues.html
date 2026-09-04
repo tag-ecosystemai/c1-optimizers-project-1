@@ -8,16 +8,19 @@
 {% block content %}
 {{ page_header(icon_people(), "queue manifest", "Team Queues") }}
 
-<form class="card" method="get" id="queueForm">
-  <label class="field-label" for="queueSelect">Select Team Queue</label>
-  <select id="queueSelect" name="queue">
-    {% for q in queues %}
-    <option value="{{ q }}" {{ "selected" if q == selected }}>{{ q }}</option>
+<div class="queue-layout">
+  <nav class="team-folder-list" aria-label="Teams">
+    {% for t in teams %}
+    <a href="{{ url_for('main.team_queues', queue=t) }}"
+       class="team-folder-item {{ 'active' if t == selected }}">
+      {{ t }}
+    </a>
     {% endfor %}
-  </select>
-  <noscript><button type="submit" class="btn btn-primary">View queue</button></noscript>
-</form>
+  </nav>
 
-<h2>{{ selected }} Queue</h2>
-{{ message_table(messages, queue_accents) }}
+  <div class="queue-content">
+    <h2>{{ selected }} Queue</h2>
+    {{ message_table(messages, team_accents, teams, show_reassign=True) }}
+  </div>
+</div>
 {% endblock %}
