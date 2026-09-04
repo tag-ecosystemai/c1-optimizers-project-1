@@ -1,5 +1,9 @@
-"""scripts/poll_email.py — polls an inbox, forwards new emails to /ingest/email."""
+"""scripts/poll_email.py — polls an inbox, forwards new emails to /ingest/email.
 
+Can run standalone (python scripts/poll_email.py) for local testing,
+or be imported and called by backend/main.py's background task when deployed.
+"""
+import sys
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -12,7 +16,12 @@ import requests
 IMAP_HOST = "imap.gmail.com"
 IMAP_USER = os.environ["IMAP_USER"]
 IMAP_PASSWORD = os.environ["IMAP_PASSWORD"]
-API_URL = "http://127.0.0.1:8000/ingest/email"
+
+# Defaults to localhost for local dev; on Render this reads from the
+# API_URL env var, pointed at the app's own address since the poller
+# runs inside the same process as the backend.
+API_URL = os.environ.get("API_URL", "http://127.0.0.1:8000/ingest/email")
+
 POLL_SECONDS = 30
 
 
@@ -37,14 +46,19 @@ def check_inbox():
         else:
             body = msg.get_payload(decode=True).decode(errors="ignore")
 
-        requests.post(API_URL, json={"subject": subject, "body": body, "from": from_addr})
-        print(f"Ingested: {subject}")
+        try:
+            requests.post(API_URL, json={"subject": subject, "body": body, "from": from_addr}, timeout=15)
+            print(f"Ingested: {subject}")
+        except requests.RequestException as e:
+            print(f"Failed to ingest '{subject}': {e}")
 
     conn.logout()
 
 
 if __name__ == "__main__":
-    print(f"Polling {IMAP_USER} every {POLL_SECONDS}s...")
-    while True:
+    if "--once" in sys.argv:
         check_inbox()
-        time.sleep(POLL_SECONDS)
+    else:
+        while True:
+            check_inbox()
+            time.sleep(POLL_SECONDS)
