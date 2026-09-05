@@ -2,6 +2,7 @@
 
 import csv
 import io
+import logging
 
 from fastapi import APIRouter, Depends, HTTPException, UploadFile
 from sqlalchemy.orm import Session
@@ -11,7 +12,7 @@ from backend.schemas import TicketIngest, TicketResponse
 from backend.services import adapters, classifier, repository
 
 router = APIRouter(prefix="/ingest", tags=["ingest"])
-
+logger = logging.getLogger(__name__)
 
 def _classify_and_save(db: Session, normalized: dict) -> TicketResponse:
     classified = classifier.classify(
@@ -44,12 +45,15 @@ def ingest(payload: TicketIngest, db: Session = Depends(get_db)):
 
 @router.post("/slack", response_model=TicketResponse | dict)
 def ingest_slack(payload: dict, db: Session = Depends(get_db)):
+    logger.info(f"Slack payload: {payload}")  # ADD THIS LINE
+    
     if payload.get("type") == "url_verification":
         return {"challenge": payload["challenge"]}
 
     normalized = adapters.from_slack(payload)
+    logger.info(f"Normalized: {normalized}")  # AND THIS LINE
     if not normalized["body"]:
-        return {"status": "ignored"}  # skip non-message events (joins, reactions, etc.)
+        return {"status": "ignored"}
 
     return _classify_and_save(db, normalized)
 

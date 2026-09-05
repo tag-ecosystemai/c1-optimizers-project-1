@@ -20,7 +20,7 @@ IMAP_PASSWORD = os.environ["IMAP_PASSWORD"]
 # Defaults to localhost for local dev; on Render this reads from the
 # API_URL env var, pointed at the app's own address since the poller
 # runs inside the same process as the backend.
-API_URL = os.environ.get("API_URL", "http://127.0.0.1:8000/ingest/email")
+API_URL = os.environ.get("INGEST_EMAIL_URL", "http://127.0.0.1:8000/ingest/email")
 
 POLL_SECONDS = 30
 
