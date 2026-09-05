@@ -928,13 +928,18 @@ section > h2 {
 }
 
 .table-wrap table {
-  min-width: 900px;  /* forces horizontal scroll instead of squeezing columns */
+  min-width: 1200px;  /* forces horizontal scroll instead of squeezing columns */
   white-space: nowrap;
 }
 
 .table-wrap td {
   white-space: normal;  /* body/subject can still wrap within their own cell */
   max-width: 260px;
+}
+
+.table-wrap td:nth-child(4) {
+  max-width: 420px;
+  min-width: 420px;
 }
 
 table {

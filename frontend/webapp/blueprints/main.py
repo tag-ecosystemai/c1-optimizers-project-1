@@ -94,11 +94,11 @@ def classify():
                 )
                 resp.raise_for_status()
                 result = resp.json()
+                flash("Message classified successfully.", "success")
             except requests.RequestException as e:
                 flash(f"Could not reach the classification service: {e}", "error")
 
     return render_template("classify.html", message_text=message_text, result=result)
-
 
 @bp.route("/dashboard")
 def dashboard():
