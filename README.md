@@ -81,7 +81,9 @@ c1-optimizers-project-1/
 │
 ├── docs
 │   ├── Application_loading.png
-│   ├── Architecture_diagram.png    
+│   ├── Architecture_diagram.png
+│   ├── NorthStack Presentation slides.pptx   
+│   ├── Video demo.mp4
 │   └── PRD_Customer_Intelligence_Classifier.md
 ├── requirements.txt
 └── README.md
