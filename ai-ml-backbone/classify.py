@@ -22,15 +22,15 @@ def _ensure_loaded():
     gc.collect()
 
     print("Loading intent classifier...")
-    _intent_model = joblib.load(os.path.join(MODELS_DIR, 'intent_classifier_svm.joblib'))
+    _intent_model = joblib.load(os.path.join(MODELS_DIR, 'intent_classifier.joblib'))
     gc.collect()
 
     print("Loading sentiment classifier...")
-    _sentiment_model = joblib.load(os.path.join(MODELS_DIR, 'sentiment_classifier_svm.joblib'))
+    _sentiment_model = joblib.load(os.path.join(MODELS_DIR, 'sentiment_classifier.joblib'))
     gc.collect()
 
     print("Loading priority classifier...")
-    _priority_model = joblib.load(os.path.join(MODELS_DIR, 'priority_classifier_svm.joblib'))
+    _priority_model = joblib.load(os.path.join(MODELS_DIR, 'priority_classifier.joblib'))
     gc.collect()
 
     _models_loaded = True
