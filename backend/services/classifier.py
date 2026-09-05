@@ -1,25 +1,32 @@
-import requests
-import os
 import sys
+import gc
 from pathlib import Path
 from typing import Any
 
-ML_SERVICE_URL = os.environ.get("ML_SERVICE_URL")
+_ML_DIR = Path(__file__).resolve().parents[2] / "ai-ml-backbone"
 
-_loaded = False
+_classify_and_route = None
+
 
 def load() -> None:
-    global _loaded
-    _loaded = True
+    global _classify_and_route
+
+    if _classify_and_route is not None:
+        return
+
+    if str(_ML_DIR) not in sys.path:
+        sys.path.insert(0, str(_ML_DIR))
+
+    from classify import classify_and_route
+    _classify_and_route = classify_and_route
+
 
 def is_ready() -> bool:
-    return _loaded
+    return _classify_and_route is not None
+
 
 def classify(subject: str | None, body: str, language: str | None = None) -> dict[str, Any]:
-    response = requests.post(
-        f"{ML_SERVICE_URL}/classify",
-        json={"subject": subject, "body": body, "language": language},
-        timeout=30,
-    )
-    response.raise_for_status()
-    return response.json()
+    if _classify_and_route is None:
+        raise RuntimeError("Classifier not loaded; call load() during startup.")
+
+    return _classify_and_route(subject=subject, body=body, language=language)

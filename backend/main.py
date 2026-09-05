@@ -24,10 +24,10 @@ async def load_models_background():
 def start_email_poller():
     try:
         import sys
+        import time
         from pathlib import Path
         sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
         from scripts.poll_email import check_inbox
-        import time
         logger.info("Email poller started.")
         while True:
             try:
