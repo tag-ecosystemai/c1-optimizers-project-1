@@ -55,10 +55,12 @@ def _get_embedding(text: str) -> list:
     encoded = _tokenizer.encode(text)
     input_ids = np.array([encoded.ids], dtype=np.int64)
     attention_mask = np.array([encoded.attention_mask], dtype=np.int64)
+    token_type_ids = np.zeros_like(input_ids, dtype=np.int64)
 
     outputs = _ort_session.run(None, {
         "input_ids": input_ids,
         "attention_mask": attention_mask,
+        "token_type_ids": token_type_ids,
     })
 
     # Mean pooling
