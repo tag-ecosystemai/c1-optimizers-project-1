@@ -13,82 +13,82 @@ This repository contains Team Optimizers' work for Project 1 of the TAG AI Engin
 - Atujuna Emmanuel
 - Jayeoba Victor
 
+## NorthStack Customer Intelligence Classifier
+
+An AI-powered platform that automatically classifies incoming customer messages by **intent**, **sentiment**, and **priority**, then routes each one to the correct specialist team — built for NorthStack, a mid-size B2B SaaS company.
+
 ## Project Brief
 
-To be added when Project 1 begins.
+NorthStack's internal teams receive a high volume of messages daily — support tickets, in-app feedback, and reviews — arriving via email, Slack, and CSV exports. Today, a small team of coordinators manually triages every message before it reaches the right specialist team, creating a bottleneck as volume grows.
+
+This project builds a system that automatically:
+1. Reads an incoming message (from email, Slack, or a bulk CSV upload)
+2. Classifies its **intent** (which of 10 teams it belongs to), **sentiment** (Positive / Neutral / Negative), and **priority** (low / medium / high)
+3. Routes it to the correct team
+4. Surfaces everything through a live dashboard and per-team queue views
+
+Full business context and architecture reasoning: see `PRD_Customer_Intelligence_Classifier.md`.
 
 ## Objectives
 
-To be completed by the team.
+- Diagnose and justify the right ML approach for the problem (classical ML vs. DL vs. LLM vs. RAG vs. agents) rather than defaulting to the most fashionable option
+- Train and evaluate real classifiers on a genuine, non-toy dataset, with honest reporting of accuracy, limitations, and failure modes
+- Support live ingestion from multiple real channels (Slack, email, CSV) through one shared classification core
+- Provide a usable, real-time dashboard for both leadership (overall analytics) and individual teams (their own queue)
+- Compare the chosen classical ML approach against local LLMs (zero-shot) on the same task, with real accuracy and latency numbers — not just an assumption
+- Design and deploy within real infrastructure constraints (free-tier hosting, no budget), documenting trade-offs made along the way rather than hiding them
 
 ## Tech Stack
 
-To be documented by the team.
+| Layer | Technology |
+|---|---|
+| **ML / Classification** | Python, scikit-learn (Logistic Regression / SVM), TF-IDF (`TfidfVectorizer`) |
+| **Backend API** | FastAPI, SQLAlchemy, Alembic (migrations), Pydantic |
+| **Database** | PostgreSQL (Docker locally, managed Postgres on Render) |
+| **Frontend** | Flask, Jinja2 |
+| **Live ingestion** | Slack Bolt SDK, IMAP (email polling) |
+| **LLM comparison** | Ollama (local models — Mistral, Llama 3.1) |
+| **Dataset** | [Tobi-Bueck/customer-support-tickets](https://huggingface.co/datasets/Tobi-Bueck/customer-support-tickets) (Hugging Face) |
+| **Deployment** | Render (Postgres + FastAPI backend + Flask frontend, as separate services) |
+| **Version control** | Git, Git LFS (for trained model files) |
 
 ## Project Structure
 
 ```
 c1-optimizers-project-1/
 │
-├── ai-ml-backbone/
-│   ├── classify.py                              — core classify_and_route() function (embed → predict intent + sentiment)
-│   ├── eda-and-model-development-notebook.ipynb  — original exploratory/training notebook (gitignored, local only)
-│   ├── test.py                                   — standalone script to sanity-check classify.py works
-│   ├── requirements.txt                          — Python deps for the ML side (sentence-transformers, sklearn, etc.)
-│   └── models/
-│       ├── intent_classifier_svm.joblib          — trained SVM, predicts queue (tracked via Git LFS)
-│       └── sentiment_classifier_svm.joblib       — trained SVM, predicts sentiment (tracked via Git LFS)
+├── ai-ml-backbone/                # Core ML: feature extraction + classification logic
+│   ├── classify.py                # classify_and_route() — the single source of truth
+│   ├── eda-model-development-notebook.ipynb
+│   └── models/                    # Trained models + fitted TF-IDF vectorizer — Git LFS
 │
-├── alembic/                                      — database migration tooling (Alembic)
-│   ├── versions/                                 — individual migration files (schema change history)
-│   ├── env.py                                    — Alembic's runtime config
-│   ├── script.py.mako                            — template used when generating new migrations
-│   └── README
+├── backend/                       # FastAPI application
+│   ├── main.py                    # App entrypoint, router registration, model warmup
+│   ├── config.py / database.py / models.py / schemas.py
+│   ├── routers/                   # health, ingest, tickets
+│   └── services/                  # classifier (ML bridge), adapters, repository, analytics
 │
-├── backend/                                      — the FastAPI application
-│   ├── __init__.py
-│   ├── main.py                                   — app entrypoint; loads classifier on startup; ONLY health router registered so far
-│   ├── config.py                                 — settings (DB URL, API host/port, embedding model name) via pydantic-settings
-│   ├── database.py                               — SQLAlchemy engine/session setup, get_db() dependency
-│   ├── models.py                                 — DB tables: Ticket, BatchJob (SQLAlchemy ORM, not ML models)
-│   ├── schemas.py                                — Pydantic schemas; currently only Health/Readiness — ticket/ingest schemas NOT yet written
-│   ├── SETUP.md                                  — setup instructions + known issues (well documented)
-│   │
-│   ├── routers/                                  — API route definitions
-│   │   ├── health.py                             — ✅ IMPLEMENTED: /health, /health/ready
-│   │   ├── ingest.py                              — ⚠️ STUB ONLY: /ingest, /ingest/slack, /ingest/email, /batch-upload — no code yet
-│   │   └── tickets.py                            — ⚠️ STUB ONLY: ticket CRUD — no code yet
-│   │
-│   ├── services/                                 — business logic layer
-│   │   ├── classifier.py                         — ✅ IMPLEMENTED: wraps classify_and_route(), derives priority from sentiment
-│   │   ├── adapters.py                           — ⚠️ STUB ONLY: normalize Slack/email/CSV payloads — no code yet
-│   │   ├── repository.py                         — ⚠️ STUB ONLY: DB persistence helpers — no code yet
-│   │   └── analytics.py                          — ⚠️ STUB ONLY: aggregate endpoints for Streamlit dashboard — no code yet
-│   │
-│   └── tests/                                    — backend automated tests (contents not yet reviewed)
+├── frontend/                      # Flask application
+│   └── webapp/
+│       ├── blueprints/main.py     # All page routes
+│       └── templates/             # home, dashboard, team_queues, classify, bulk_upload, glossary
 │
-├── docker/
-│   └── initdb/
-│       └── 01-app-user.sh                        — runs once on fresh DB volume; creates the app's DB role/permissions
-│
-├── docker-compose.yml                            — spins up Postgres (port 5433 on host, to avoid clashing with local Postgres)
-│
-├── frontend/                                     — Streamlit app (contents not yet reviewed)
-│   └── requirements.txt
-│
+├── alembic/                       # Database migrations
+├── docker-compose.yml             # Local Postgres
 ├── scripts/
-│   └── seed_db.py                                — ✅ IMPLEMENTED: populates tickets table using the REAL classifier (not fake data)
+│   ├── seed_db.py                 # Populate DB with real-classified sample data
+│   ├── slack_listener.py          # Live Slack ingestion
+│   ├── poll_email.py              # Live email ingestion (IMAP polling)
+│   └── llm_classifier.py          # Local LLM comparison (Ollama)
 │
-├── .dockerignore
-├── .env.example                                  — template for required environment variables (copy to .env, fill in secrets)
-├── .gitignore
-├── alembic.ini                                   — Alembic configuration file
+├── PRD_Customer_Intelligence_Classifier.md
+├── requirements.txt
 └── README.md
 ```
 
 ## Getting Started
 
-Setup instructions will be added by the team.
+This is the link to the deployed application:
 
 ## Team Workflow
 

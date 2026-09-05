@@ -1,8 +1,6 @@
-"""FastAPI application entrypoint. Builds the app, mounts routers, and
-warms the classifier in the background so the port opens immediately."""
-
 import asyncio
 import logging
+import threading
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 
@@ -16,8 +14,6 @@ logger = logging.getLogger(__name__)
 
 
 async def load_models_background():
-    """Runs model loading in a thread so it doesn't block the event loop
-    or delay port binding."""
     try:
         await asyncio.to_thread(classifier.load)
         logger.info("Classifier ready.")
@@ -25,10 +21,30 @@ async def load_models_background():
         logger.error(f"Classifier failed to load: {e}")
 
 
+def start_email_poller():
+    try:
+        import sys
+        from pathlib import Path
+        sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+        from scripts.poll_email import check_inbox
+        import time
+        logger.info("Email poller started.")
+        while True:
+            try:
+                check_inbox()
+            except Exception as e:
+                logger.error(f"Email poll error: {e}")
+            time.sleep(30)
+    except Exception as e:
+        logger.error(f"Email poller failed to start: {e}")
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
-    logger.info("Starting up - port will open immediately, models load in background...")
+    logger.info("Starting up...")
     asyncio.create_task(load_models_background())
+    email_thread = threading.Thread(target=start_email_poller, daemon=True)
+    email_thread.start()
     yield
 
 
