@@ -1,3 +1,5 @@
+--extra-index-url https://download.pytorch.org/whl/cpu
+
 fastapi==0.141.1
 uvicorn==0.51.0
 sqlalchemy==2.0.47
@@ -14,7 +16,6 @@ werkzeug==3.1.8
 
 sentence-transformers==6.0.0
 transformers==5.5.1
---extra-index-url https://download.pytorch.org/whl/cpu
 torch==2.11.0+cpu
 scikit-learn==1.8.0
 joblib==1.5.3

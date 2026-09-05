@@ -1,4 +1,11 @@
-"""Wraps ai_ml_backbone.classify_and_route."""
+"""
+backend/services/classifier.py
+
+Wraps ai_ml_backbone.classify_and_route.
+Models are loaded lazily inside classify.py itself, so calling load()
+here is now a no-op — it just imports the module without triggering
+any model loading.
+"""
 
 import sys
 from pathlib import Path
@@ -18,7 +25,7 @@ def load() -> None:
     if str(_ML_DIR) not in sys.path:
         sys.path.insert(0, str(_ML_DIR))
 
-    from classify import classify_and_route
+    from classify import classify_and_route  # safe now — no models load at import
 
     _classify_and_route = classify_and_route
 

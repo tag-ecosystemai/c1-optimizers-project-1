@@ -2,9 +2,8 @@
 classify.py
 
 Core classification logic for the Customer Intelligence Classifier.
-Loads the embedder + all three trained models ONCE, sequentially with
-garbage collection between each to keep peak memory usage down (needed
-for low-memory hosting environments).
+Models are loaded lazily on first use to keep startup memory low —
+critical for free-tier hosting environments (e.g. Render 512MB).
 """
 
 from sentence_transformers import SentenceTransformer
@@ -14,23 +13,38 @@ import gc
 
 MODELS_DIR = os.path.join(os.path.dirname(__file__), 'models')
 
-print("Loading embedding model...")
-embedder = SentenceTransformer('paraphrase-multilingual-MiniLM-L12-v2')
-gc.collect()
+# Module-level references — None until first call to _ensure_loaded()
+_embedder = None
+_intent_model = None
+_sentiment_model = None
+_priority_model = None
+_models_loaded = False
 
-print("Loading intent classifier...")
-intent_model = joblib.load(os.path.join(MODELS_DIR, 'intent_classifier_svm.joblib'))
-gc.collect()
 
-print("Loading sentiment classifier...")
-sentiment_model = joblib.load(os.path.join(MODELS_DIR, 'sentiment_classifier_svm.joblib'))
-gc.collect()
+def _ensure_loaded():
+    global _embedder, _intent_model, _sentiment_model, _priority_model, _models_loaded
 
-print("Loading priority classifier...")
-priority_model = joblib.load(os.path.join(MODELS_DIR, 'priority_classifier_svm.joblib'))
-gc.collect()
+    if _models_loaded:
+        return
 
-print("All models loaded.")
+    print("Loading embedding model...")
+    _embedder = SentenceTransformer('paraphrase-multilingual-MiniLM-L12-v2')
+    gc.collect()
+
+    print("Loading intent classifier...")
+    _intent_model = joblib.load(os.path.join(MODELS_DIR, 'intent_classifier_svm.joblib'))
+    gc.collect()
+
+    print("Loading sentiment classifier...")
+    _sentiment_model = joblib.load(os.path.join(MODELS_DIR, 'sentiment_classifier_svm.joblib'))
+    gc.collect()
+
+    print("Loading priority classifier...")
+    _priority_model = joblib.load(os.path.join(MODELS_DIR, 'priority_classifier_svm.joblib'))
+    gc.collect()
+
+    _models_loaded = True
+    print("All models loaded.")
 
 
 def build_text(subject: str, body: str) -> str:
@@ -40,12 +54,14 @@ def build_text(subject: str, body: str) -> str:
 
 
 def classify_and_route(subject: str, body: str, language: str = None) -> dict:
-    text = build_text(subject, body)
-    embedding = embedder.encode([text])
+    _ensure_loaded()  # ← loads on first real request, not at import time
 
-    predicted_queue = intent_model.predict(embedding)[0]
-    predicted_sentiment = sentiment_model.predict(embedding)[0]
-    predicted_priority = priority_model.predict(embedding)[0]
+    text = build_text(subject, body)
+    embedding = _embedder.encode([text])
+
+    predicted_queue = _intent_model.predict(embedding)[0]
+    predicted_sentiment = _sentiment_model.predict(embedding)[0]
+    predicted_priority = _priority_model.predict(embedding)[0]
 
     routed_team = predicted_queue
 
