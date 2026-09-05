@@ -1,23 +1,15 @@
-"""
-classify.py
-
-Core classification logic for the Customer Intelligence Classifier.
-Embeddings are generated via the Hugging Face Inference API (no local
-embedding model loaded) to keep memory usage within free-tier limits.
-The three SVM classifiers are loaded lazily on first use.
-"""
-
 import os
 import gc
-import time
+import numpy as np
 import joblib
-import requests
+from tokenizers import Tokenizer
+import onnxruntime as ort
 
 MODELS_DIR = os.path.join(os.path.dirname(__file__), 'models')
+ONNX_DIR = os.path.join(MODELS_DIR, 'onnx')
 
-HF_API_URL = "https://api-inference.huggingface.co/models/paraphrase-multilingual-MiniLM-L12-v2"
-HF_TOKEN = os.environ.get("HF_TOKEN")
-
+_tokenizer = None
+_ort_session = None
 _intent_model = None
 _sentiment_model = None
 _priority_model = None
@@ -25,10 +17,23 @@ _models_loaded = False
 
 
 def _ensure_loaded():
-    global _intent_model, _sentiment_model, _priority_model, _models_loaded
+    global _tokenizer, _ort_session, _intent_model, _sentiment_model, _priority_model, _models_loaded
 
     if _models_loaded:
         return
+
+    print("Loading tokenizer from disk...")
+    _tokenizer = Tokenizer.from_file(os.path.join(ONNX_DIR, 'tokenizer.json'))
+    _tokenizer.enable_padding(pad_id=1, pad_token="<pad>")
+    _tokenizer.enable_truncation(max_length=128)
+    gc.collect()
+
+    print("Loading ONNX session from disk...")
+    _ort_session = ort.InferenceSession(
+        os.path.join(ONNX_DIR, 'model_qint8_avx512.onnx'),
+        providers=["CPUExecutionProvider"]
+    )
+    gc.collect()
 
     print("Loading intent classifier...")
     _intent_model = joblib.load(os.path.join(MODELS_DIR, 'intent_classifier_svm.joblib'))
@@ -43,38 +48,26 @@ def _ensure_loaded():
     gc.collect()
 
     _models_loaded = True
-    print("All classifiers loaded.")
+    print("All models loaded.")
 
 
 def _get_embedding(text: str) -> list:
-    """Calls the HF Inference API to get the embedding for a piece of text.
-    Retries once if the model is still warming up on HF's side (503)."""
-    headers = {"Authorization": f"Bearer {HF_TOKEN}"}
+    encoded = _tokenizer.encode(text)
+    input_ids = np.array([encoded.ids], dtype=np.int64)
+    attention_mask = np.array([encoded.attention_mask], dtype=np.int64)
 
-    for attempt in range(3):
-        response = requests.post(
-            HF_API_URL,
-            headers=headers,
-            json={"inputs": text},
-            timeout=30,
-        )
+    outputs = _ort_session.run(None, {
+        "input_ids": input_ids,
+        "attention_mask": attention_mask,
+    })
 
-        if response.status_code == 200:
-            return [response.json()]  # wrap in list to match shape SVMs expect
-
-        if response.status_code == 503:
-            # HF model is loading on their side — wait and retry
-            wait = int(response.headers.get("X-WaitFor", 20))
-            print(f"HF model warming up, waiting {wait}s (attempt {attempt + 1}/3)...")
-            time.sleep(wait)
-            continue
-
-        # Any other error — raise immediately with detail
-        raise RuntimeError(
-            f"HF Inference API error {response.status_code}: {response.text}"
-        )
-
-    raise RuntimeError("HF Inference API did not become ready after 3 attempts.")
+    # Mean pooling
+    token_embeddings = outputs[0]
+    mask = attention_mask[..., np.newaxis].astype(np.float32)
+    sum_embeddings = np.sum(token_embeddings * mask, axis=1)
+    sum_mask = np.clip(mask.sum(axis=1), a_min=1e-9, a_max=None)
+    embedding = sum_embeddings / sum_mask
+    return embedding.tolist()
 
 
 def build_text(subject: str, body: str) -> str:
