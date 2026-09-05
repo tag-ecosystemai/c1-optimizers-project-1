@@ -15,11 +15,11 @@ This repository contains Team Optimizers' work for Project 1 of the TAG AI Engin
 
 ## NorthStack Customer Intelligence Classifier
 
-An AI-powered platform that automatically classifies incoming customer messages by **intent**, **sentiment**, and **priority**, then routes each one to the correct specialist team — built for NorthStack, a mid-size B2B SaaS company.
+An AI-powered platform that automatically classifies incoming customer messages by **intent**, **sentiment**, and **priority**, then routes each one to the correct specialist team; built for NorthStack, a mid-size B2B SaaS company.
 
 ## Project Brief
 
-NorthStack's internal teams receive a high volume of messages daily — support tickets, in-app feedback, and reviews — arriving via email, Slack, and CSV exports. Today, a small team of coordinators manually triages every message before it reaches the right specialist team, creating a bottleneck as volume grows.
+NorthStack's internal teams receive a high volume of messages daily including support tickets, in-app feedback, and reviews, arriving via email, Slack, and CSV exports. Today, a small team of coordinators manually triages every message before it reaches the right specialist team, creating a bottleneck as volume grows.
 
 This project builds a system that automatically:
 1. Reads an incoming message (from email, Slack, or a bulk CSV upload)
@@ -27,16 +27,15 @@ This project builds a system that automatically:
 3. Routes it to the correct team
 4. Surfaces everything through a live dashboard and per-team queue views
 
-Full business context and architecture reasoning: see `PRD_Customer_Intelligence_Classifier.md`.
+Full business context and architecture reasoning: see the `PRD_Customer_Intelligence_Classifier.md` in the docs folder.
 
 ## Objectives
 
 - Diagnose and justify the right ML approach for the problem (classical ML vs. DL vs. LLM vs. RAG vs. agents) rather than defaulting to the most fashionable option
 - Train and evaluate real classifiers on a genuine, non-toy dataset, with honest reporting of accuracy, limitations, and failure modes
-- Support live ingestion from multiple real channels (Slack, email, CSV) through one shared classification core
-- Provide a usable, real-time dashboard for both leadership (overall analytics) and individual teams (their own queue)
-- Compare the chosen classical ML approach against local LLMs (zero-shot) on the same task, with real accuracy and latency numbers — not just an assumption
-- Design and deploy within real infrastructure constraints (free-tier hosting, no budget), documenting trade-offs made along the way rather than hiding them
+- Support ingestion from multiple real channels (Slack, email, CSV) through one shared classification core
+- Provide a usable dashboard for both leadership (overall analytics) and individual teams (their own queue)
+- Design and deploy within real infrastructure constraints (free-tier hosting, no budget), documenting trade-offs made along the way.
 
 ## Tech Stack
 
@@ -46,8 +45,7 @@ Full business context and architecture reasoning: see `PRD_Customer_Intelligence
 | **Backend API** | FastAPI, SQLAlchemy, Alembic (migrations), Pydantic |
 | **Database** | PostgreSQL (Docker locally, managed Postgres on Render) |
 | **Frontend** | Flask, Jinja2 |
-| **Live ingestion** | Slack Bolt SDK, IMAP (email polling) |
-| **LLM comparison** | Ollama (local models — Mistral, Llama 3.1) |
+| **Ingestion** | Slack Bolt SDK, IMAP (email polling) |
 | **Dataset** | [Tobi-Bueck/customer-support-tickets](https://huggingface.co/datasets/Tobi-Bueck/customer-support-tickets) (Hugging Face) |
 | **Deployment** | Render (Postgres + FastAPI backend + Flask frontend, as separate services) |
 | **Version control** | Git, Git LFS (for trained model files) |
@@ -81,14 +79,23 @@ c1-optimizers-project-1/
 │   ├── poll_email.py              # Live email ingestion (IMAP polling)
 │   └── llm_classifier.py          # Local LLM comparison (Ollama)
 │
-├── PRD_Customer_Intelligence_Classifier.md
+├── docs
+│   ├── Application_loading.png
+│   ├── Architecture_diagram.png    
+│   └── PRD_Customer_Intelligence_Classifier.md
 ├── requirements.txt
 └── README.md
 ```
 
 ## Getting Started
 
-This is the link to the deployed application:
+This is the link to the deployed application on Render: https://flask-frontend-xkru.onrender.com/
+
+NOTE: Chances are that when you click on the link it would show you the page below:
+
+![Application loading](docs/Application_loading.png)
+
+It is totally fine and not an issue. We used the free tier of the Render platform which means that the application spins down after 15 minutes of inactivity. And so when you click on the link give it about 2-3 minutes or less for it to come up.
 
 ## Team Workflow
 

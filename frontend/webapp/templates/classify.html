@@ -28,3 +28,13 @@
   </button>
 </form>
 {% endblock %}
+
+{% if result %}
+<div class="card" style="margin-top: 1.5rem;">
+  <h2>Classification Result</h2>
+  <p><strong>Predicted Team:</strong> {{ result.predicted_queue }}</p>
+  <p><strong>Sentiment:</strong> {{ result.predicted_sentiment }}</p>
+  <p><strong>Priority:</strong> {{ result.priority }}</p>
+  <a href="{{ url_for('main.dashboard') }}" class="btn btn-primary">View on Dashboard &rarr;</a>
+</div>
+{% endif %}

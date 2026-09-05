@@ -38,7 +38,7 @@
           {% else %}—{% endif %}
         </td>
         <td>{{ m.subject or "—" }}</td>
-        <td>{{ m.body[:50] }}{% if m.body|length > 50 %}&hellip;{% endif %}</td>
+        <td>{{ m.body[:100] }}{% if m.body|length > 100 %}&hellip;{% endif %}</td>
         <td class="mono">{{ m.source }}</td>
         <td class="mono">{{ m.language or "—" }}</td>
         <td><span class="stamp stamp-{{ m.predicted_sentiment|lower }}">{{ m.predicted_sentiment }}</span></td>
